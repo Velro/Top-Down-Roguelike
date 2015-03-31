@@ -12,13 +12,31 @@ public class GamePlayManager : Singleton<GamePlayManager>
     private RoomManager destination;
     private DoorTransition destinationDoor;
 
+    private bool isPaused;
+
 	// Use this for initialization
 	void Start () 
     {
         player = GameObject.FindGameObjectWithTag("Player");
         mainCamera = Camera.main.gameObject;
 	}
+
+    void Update()
+    {
+        if (Input.GetButtonDown("Pause"))
+        {
+            isPaused = !isPaused;
+            Time.timeScale = (isPaused) ? 0 : 1;
+            UIManager.Instance.TogglePauseMenu(isPaused);
+        }
+    }
 	
+    public void PlayerDied ()
+    {
+        Time.timeScale = 0;
+        UIManager.Instance.GameOver();
+    }
+
 	public void RoomTransition (RoomManager destination, DoorTransition destinationDoor)
     {
         this.destination = destination;

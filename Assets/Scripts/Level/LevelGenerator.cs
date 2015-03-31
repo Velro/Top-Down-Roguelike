@@ -32,6 +32,10 @@ public class LevelGenerator : Singleton<LevelGenerator>
     public int maxNumberOfRooms;
     private int numberOfRooms;
 
+
+    [Range(0f, 100f)]
+    public float chanceForInferredDoorConnections = 70f;
+
     [Header("Prefab Connections")]
     public roomPrefabWeightPair[] roomTypes;
     public DoorTransition eastWestDoorPrefab;
@@ -61,46 +65,16 @@ public class LevelGenerator : Singleton<LevelGenerator>
             RoomManager roomInConstruction = Instantiate(WeightedRandomizer.From(roomWeightDictionary).TakeOne(), Vector3.zero, Quaternion.identity) as RoomManager;
             PlaceRoom(roomInConstruction);
         }
+
+        AddInferredDoors(builtRooms.ToArray());
+
+        PopulateMinimap(builtRooms.ToArray());
 	}
 
     void PlaceRoom(RoomManager roomInConstruction)
     {
-        
-        //get all potential places we can connect a new room in
-        List<ConnectionPoint> potentialConnectionPoints = new List<ConnectionPoint>();
-        for (int roomTestIndex = 0; roomTestIndex < builtRooms.Count; roomTestIndex++)
-        {
-            if (builtRooms[roomTestIndex].possibleDoorlocations.east && roomInConstruction.possibleDoorlocations.west)
-            {
-                ConnectionPoint point;
-                point.room = builtRooms[roomTestIndex];
-                point.doorLocation = CardinalDirections.east;
-                potentialConnectionPoints.Add(point);
-            }
-            if (builtRooms[roomTestIndex].possibleDoorlocations.west && roomInConstruction.possibleDoorlocations.east)
-            {
-                ConnectionPoint point;
-                point.room = builtRooms[roomTestIndex];
-                point.doorLocation = CardinalDirections.west;
-                potentialConnectionPoints.Add(point);
-            }
-            if (builtRooms[roomTestIndex].possibleDoorlocations.north && roomInConstruction.possibleDoorlocations.south)
-            {
-                ConnectionPoint point;
-                point.room = builtRooms[roomTestIndex];
-                point.doorLocation = CardinalDirections.north;
-                potentialConnectionPoints.Add(point);
-            }
-            if (builtRooms[roomTestIndex].possibleDoorlocations.south && roomInConstruction.possibleDoorlocations.north)
-            {
-                ConnectionPoint point;
-                point.room = builtRooms[roomTestIndex];
-                point.doorLocation = CardinalDirections.south;
-                potentialConnectionPoints.Add(point);
-            }
-        }
+        ConnectionPoint randomConnectionPoint = GetRandomConnectionPoint(builtRooms, roomInConstruction);
 
-        ConnectionPoint randomConnectionPoint = potentialConnectionPoints[Random.Range(0, potentialConnectionPoints.Count)];
         //figure out where to place next room based on connection point
         Vector3 roomPosition = Vector3.zero;
         
@@ -115,7 +89,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
             else
             {
                 roomInConstruction.transform.position = roomPosition;
-                AddDoors(randomConnectionPoint, roomInConstruction);
+                AddDoor(randomConnectionPoint.room, roomInConstruction);
                 builtRooms.Add(roomInConstruction);
             }
         }
@@ -129,7 +103,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
             else
             {
                 roomInConstruction.transform.position = roomPosition;
-                AddDoors(randomConnectionPoint, roomInConstruction);
+                AddDoor(randomConnectionPoint.room, roomInConstruction);
                 builtRooms.Add(roomInConstruction);
             }
         }
@@ -143,7 +117,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
             else
             {
                 roomInConstruction.transform.position = roomPosition;
-                AddDoors(randomConnectionPoint, roomInConstruction);
+                AddDoor(randomConnectionPoint.room, roomInConstruction);
                 builtRooms.Add(roomInConstruction);
             }
         }
@@ -157,104 +131,50 @@ public class LevelGenerator : Singleton<LevelGenerator>
             else
             {
                 roomInConstruction.transform.position = roomPosition;
-                AddDoors(randomConnectionPoint, roomInConstruction);
+                AddDoor(randomConnectionPoint.room, roomInConstruction);
                 builtRooms.Add(roomInConstruction);
             }
         }
     }
 
-    void AddDoors(ConnectionPoint randomConnectionPoint, RoomManager roomInConstruction)
+    ConnectionPoint GetRandomConnectionPoint (List<RoomManager> builtRooms, RoomManager roomInConstruction)
     {
-        if (randomConnectionPoint.doorLocation == CardinalDirections.east)
+        //get all potential places we can connect a new room in
+        List<ConnectionPoint> potentialConnectionPoints = new List<ConnectionPoint>();
+        for (int roomTestIndex = 0; roomTestIndex < builtRooms.Count; roomTestIndex++)
         {
-            randomConnectionPoint.room.possibleDoorlocations.east = true;
-            roomInConstruction.generatedDoorLocations.west = true;
-
-            DoorTransition doorForAlreadyBuiltRoom = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-            DoorTransition doorForRoomInConstruction = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-            doorForAlreadyBuiltRoom.destination = doorForRoomInConstruction;
-            doorForRoomInConstruction.destination = doorForAlreadyBuiltRoom;
-
-            doorForAlreadyBuiltRoom.doorLocation = DoorTransition.CardinalDirections.east;
-            doorForRoomInConstruction.doorLocation = DoorTransition.CardinalDirections.west;
-
-            //flag this as off for following rooms
-            randomConnectionPoint.room.possibleDoorlocations.east = false;
-            roomInConstruction.possibleDoorlocations.west = false;
-
-            randomConnectionPoint.room.AddDoor(doorForAlreadyBuiltRoom);
-            roomInConstruction.AddDoor(doorForRoomInConstruction);
-
-            SendMapInfoToMinimap(roomInConstruction, randomConnectionPoint);
-        }
-        else if (randomConnectionPoint.doorLocation == CardinalDirections.west)
-        {
-            randomConnectionPoint.room.possibleDoorlocations.west = true;
-            roomInConstruction.generatedDoorLocations.east = true;
-
-            DoorTransition doorForAlreadyBuiltRoom = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-            DoorTransition doorForRoomInConstruction = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-            doorForAlreadyBuiltRoom.destination = doorForRoomInConstruction;
-            doorForRoomInConstruction.destination = doorForAlreadyBuiltRoom;
-
-            doorForAlreadyBuiltRoom.doorLocation = DoorTransition.CardinalDirections.west;
-            doorForRoomInConstruction.doorLocation = DoorTransition.CardinalDirections.east;
-
-            //flag this as off for following rooms
-            randomConnectionPoint.room.possibleDoorlocations.west = false;
-            roomInConstruction.possibleDoorlocations.east = false;
-
-            randomConnectionPoint.room.AddDoor(doorForAlreadyBuiltRoom);
-            roomInConstruction.AddDoor(doorForRoomInConstruction);
-
-            SendMapInfoToMinimap(roomInConstruction, randomConnectionPoint);
-        }
-        else if (randomConnectionPoint.doorLocation == CardinalDirections.north)
-        {
-            randomConnectionPoint.room.possibleDoorlocations.north = true;
-            roomInConstruction.generatedDoorLocations.south = true;
-
-            DoorTransition doorForAlreadyBuiltRoom = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-            DoorTransition doorForRoomInConstruction = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-            doorForAlreadyBuiltRoom.destination = doorForRoomInConstruction;
-            doorForRoomInConstruction.destination = doorForAlreadyBuiltRoom;
-
-            doorForAlreadyBuiltRoom.doorLocation = DoorTransition.CardinalDirections.north;
-            doorForRoomInConstruction.doorLocation = DoorTransition.CardinalDirections.south;
-
-            //flag this as off for following rooms
-            randomConnectionPoint.room.possibleDoorlocations.north = false;
-            roomInConstruction.possibleDoorlocations.south = false;
-
-            randomConnectionPoint.room.AddDoor(doorForAlreadyBuiltRoom);
-            roomInConstruction.AddDoor(doorForRoomInConstruction);
-
-            SendMapInfoToMinimap(roomInConstruction, randomConnectionPoint);
-        }
-        else if (randomConnectionPoint.doorLocation == CardinalDirections.south)
-        {
-            randomConnectionPoint.room.possibleDoorlocations.south = true;
-            roomInConstruction.generatedDoorLocations.north = true;
-
-            DoorTransition doorForAlreadyBuiltRoom = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-            DoorTransition doorForRoomInConstruction = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-            doorForAlreadyBuiltRoom.destination = doorForRoomInConstruction;
-            doorForRoomInConstruction.destination = doorForAlreadyBuiltRoom;
-
-            doorForAlreadyBuiltRoom.doorLocation = DoorTransition.CardinalDirections.south;
-            doorForRoomInConstruction.doorLocation = DoorTransition.CardinalDirections.north;
-
-            //flag this as off for following rooms
-            randomConnectionPoint.room.possibleDoorlocations.south = false;
-            roomInConstruction.possibleDoorlocations.north = false;
-
-            randomConnectionPoint.room.AddDoor(doorForAlreadyBuiltRoom);
-            roomInConstruction.AddDoor(doorForRoomInConstruction);
-
-            SendMapInfoToMinimap(roomInConstruction, randomConnectionPoint);
+            if (builtRooms[roomTestIndex].possibleDoorLocations.east && roomInConstruction.possibleDoorLocations.west)
+            {
+                ConnectionPoint point;
+                point.room = builtRooms[roomTestIndex];
+                point.doorLocation = CardinalDirections.east;
+                potentialConnectionPoints.Add(point);
+            }
+            if (builtRooms[roomTestIndex].possibleDoorLocations.west && roomInConstruction.possibleDoorLocations.east)
+            {
+                ConnectionPoint point;
+                point.room = builtRooms[roomTestIndex];
+                point.doorLocation = CardinalDirections.west;
+                potentialConnectionPoints.Add(point);
+            }
+            if (builtRooms[roomTestIndex].possibleDoorLocations.north && roomInConstruction.possibleDoorLocations.south)
+            {
+                ConnectionPoint point;
+                point.room = builtRooms[roomTestIndex];
+                point.doorLocation = CardinalDirections.north;
+                potentialConnectionPoints.Add(point);
+            }
+            if (builtRooms[roomTestIndex].possibleDoorLocations.south && roomInConstruction.possibleDoorLocations.north)
+            {
+                ConnectionPoint point;
+                point.room = builtRooms[roomTestIndex];
+                point.doorLocation = CardinalDirections.south;
+                potentialConnectionPoints.Add(point);
+            }
         }
 
-        
+        ConnectionPoint randomConnectionPoint = potentialConnectionPoints[Random.Range(0, potentialConnectionPoints.Count)];
+        return randomConnectionPoint;
     }
 
     bool isRoomLocationOccupied (Vector3 potentialPosition)
@@ -272,12 +192,141 @@ public class LevelGenerator : Singleton<LevelGenerator>
         return result;
     }
 
-    void SendMapInfoToMinimap (RoomManager roomInConstruction, ConnectionPoint connectionPoint)
+    void PopulateMinimap(RoomManager[] rooms)
     {
-        Vector3 transformedRoomInConstructionPos = new Vector3(roomInConstruction.transform.position.x, roomInConstruction.transform.position.z, 0);
-        Vector3 transformedConnectionPointRoomPos = new Vector3(connectionPoint.room.transform.position.x, connectionPoint.room.transform.position.z, 0);
-        MinimapManager.Instance.roomPositions.Add(transformedRoomInConstructionPos);//move from XZ plane to XY plane
-        MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(transformedRoomInConstructionPos,
-                                                               transformedConnectionPointRoomPos, 0.5f));
+        for (int i = 0; i < rooms.Length; i++)
+        {
+            Vector3 transformedRoomInConstructionPos = new Vector3(rooms[i].transform.position.x, rooms[i].transform.position.z, 0);
+            MinimapManager.Instance.roomPositions.Add(transformedRoomInConstructionPos);
+        }
+    }
+
+
+    void AddInferredDoors (RoomManager[] builtRooms)
+    {
+        for (int workingRoomIndex = 0; workingRoomIndex < builtRooms.Length; workingRoomIndex++)
+        {
+            for (int checkRoomIndex = 0; checkRoomIndex < builtRooms.Length; checkRoomIndex++)
+            {
+                AddDoor(builtRooms[workingRoomIndex], builtRooms[checkRoomIndex], chanceForInferredDoorConnections);//this will fail a lot
+            }
+        }
+    }
+
+    void AddDoor(RoomManager roomA, RoomManager roomB, float chanceToSucceed = 100f)
+    {
+        Vector3 roomDifference = roomA.transform.position - roomB.transform.position;
+        if (roomDifference.magnitude == spaceBetweenRooms && chanceToSucceed >= Random.Range(0, 100))
+        {
+            if (roomDifference.x == spaceBetweenRooms &&
+                roomA.possibleDoorLocations.west && roomB.possibleDoorLocations.east &&
+                !roomA.generatedDoorLocations.west && !roomB.generatedDoorLocations.east)
+            {
+                //roomA.generatedDoorLocations.west = true;
+                //roomB.generatedDoorLocations.east = true;
+
+                DoorTransition doorA = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                DoorTransition doorB = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                doorA.destination = doorB;
+                doorB.destination = doorA;
+
+                doorA.doorLocation = DoorTransition.CardinalDirections.west;
+                doorB.doorLocation = DoorTransition.CardinalDirections.east;
+
+                //flag this as off for following rooms
+                roomA.possibleDoorLocations.west = false;
+                roomB.possibleDoorLocations.east = false;
+
+                roomA.AddDoor(doorA);
+                roomB.AddDoor(doorB);
+
+                Vector3 roomApos = new Vector3(roomA.transform.position.x, roomA.transform.position.z, 0);
+                Vector3 roomBpos = new Vector3(roomB.transform.position.x, roomB.transform.position.z, 0);
+                MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(roomApos,
+                                                                       roomBpos, 0.5f));
+
+            }
+            else if (roomDifference.x == -spaceBetweenRooms &&
+                 roomA.possibleDoorLocations.east && roomB.possibleDoorLocations.west &&
+                !roomA.generatedDoorLocations.east && !roomB.generatedDoorLocations.west)
+            {
+                //roomA.generatedDoorLocations.east = true;
+                //roomB.generatedDoorLocations.west = true;
+
+                DoorTransition doorA = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                DoorTransition doorB = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                doorA.destination = doorB;
+                doorB.destination = doorA;
+
+                doorA.doorLocation = DoorTransition.CardinalDirections.east;
+                doorB.doorLocation = DoorTransition.CardinalDirections.west;
+
+                //flag this as off for following rooms
+                roomA.possibleDoorLocations.east = false;
+                roomB.possibleDoorLocations.west = false;
+
+                roomA.AddDoor(doorA);
+                roomB.AddDoor(doorB);
+
+                Vector3 roomApos = new Vector3(roomA.transform.position.x, roomA.transform.position.z, 0);
+                Vector3 roomBpos = new Vector3(roomB.transform.position.x, roomB.transform.position.z, 0);
+                MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(roomApos,
+                                                                       roomBpos, 0.5f));
+            }
+            else if (roomDifference.z == spaceBetweenRooms &&
+                     roomA.possibleDoorLocations.south && roomB.possibleDoorLocations.north &&
+                    !roomA.generatedDoorLocations.south && !roomB.generatedDoorLocations.north)
+            {
+                //roomA.generatedDoorLocations.south = true;
+                //roomB.generatedDoorLocations.north = true;
+
+                DoorTransition doorA = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                DoorTransition doorB = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                doorA.destination = doorB;
+                doorB.destination = doorA;
+
+                doorA.doorLocation = DoorTransition.CardinalDirections.south;
+                doorB.doorLocation = DoorTransition.CardinalDirections.north;
+
+                //flag this as off for following rooms
+                roomA.possibleDoorLocations.south = false;
+                roomB.possibleDoorLocations.north = false;
+
+                roomA.AddDoor(doorA);
+                roomB.AddDoor(doorB);
+
+                Vector3 roomApos = new Vector3(roomA.transform.position.x, roomA.transform.position.z, 0);
+                Vector3 roomBpos = new Vector3(roomB.transform.position.x, roomB.transform.position.z, 0);
+                MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(roomApos,
+                                                                       roomBpos, 0.5f));
+            }
+            else if (roomDifference.z == -spaceBetweenRooms &&
+                     roomA.possibleDoorLocations.north && roomB.possibleDoorLocations.south &&
+                    !roomA.generatedDoorLocations.north && !roomB.generatedDoorLocations.south)
+            {
+                //roomA.generatedDoorLocations.north = true;
+                //roomB.generatedDoorLocations.south = true;
+
+                DoorTransition doorA = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                DoorTransition doorB = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                doorA.destination = doorB;
+                doorB.destination = doorA;
+
+                doorA.doorLocation = DoorTransition.CardinalDirections.north;
+                doorB.doorLocation = DoorTransition.CardinalDirections.south;
+
+                //flag this as off for following rooms
+                roomA.possibleDoorLocations.north = false;
+                roomB.possibleDoorLocations.south = false;
+
+                roomA.AddDoor(doorA);
+                roomB.AddDoor(doorB);
+
+                Vector3 roomApos = new Vector3(roomA.transform.position.x, roomA.transform.position.z, 0);
+                Vector3 roomBpos = new Vector3(roomB.transform.position.x, roomB.transform.position.z, 0);
+                MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(roomApos,
+                                                                       roomBpos, 0.5f));
+            }
+        }
     }
 }

@@ -12,7 +12,7 @@ public class RoomManager : MonoBehaviour
         public bool north;
         public bool south;
     }
-    public CardinalDirections possibleDoorlocations;
+    public CardinalDirections possibleDoorLocations;
     [HideInInspector]public CardinalDirections generatedDoorLocations;
 
     public GameObject[] enemies;
