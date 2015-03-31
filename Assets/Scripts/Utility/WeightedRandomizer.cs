@@ -19,7 +19,6 @@ public static class WeightedRandomizer
 
 public class WeightedRandomizer<T>
 {
-    private static Random _random = new Random();
     private Dictionary<T, int> _weights;
 
     /// <summary>

@@ -15,11 +15,13 @@ public class RoomManager : MonoBehaviour
     public CardinalDirections possibleDoorLocations;
     [HideInInspector]public CardinalDirections generatedDoorLocations;
 
-    public GameObject[] enemies;
-    public List<DoorTransition> doors;
+    [HideInInspector]
+    public Enemy[] enemies;
+
+    [HideInInspector]
+    public DoorTransition[] doors;
 
     public Transform cameraTargetPosition;
-    private GameObject mainCamera;
 
     [Header("Prefab References")]
     public GameObject northSouthWallPrefab;
@@ -33,14 +35,20 @@ public class RoomManager : MonoBehaviour
     
     private bool isLocked = true;
 
+    [HideInInspector]
+    public GameObject minimapTile;
+
 
 	// Use this for initialization
-	void Start () {
-        mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        foreach (GameObject go in enemies)
+	void Start () 
+    {
+        enemies = transform.GetComponentsInChildren<Enemy>();
+        foreach (Enemy enemy in enemies)
         {
-            go.SetActive(false);
+            enemy.gameObject.SetActive(false);
         }
+        
+        doors = transform.GetComponentsInChildren<DoorTransition>();
 
         foreach (DoorTransition door in doors)
         {
@@ -123,7 +131,7 @@ public class RoomManager : MonoBehaviour
 
     void UnlockDoors()
     {
-        for (int i = 0; i < doors.Count; i++ )
+        for (int i = 0; i < doors.Length; i++ )
         {
             Destroy(doors[i].blocker);
         }
@@ -133,9 +141,9 @@ public class RoomManager : MonoBehaviour
     bool CheckIfEnemies()
     {
         bool enemiesExist = false;
-        foreach (GameObject go in enemies)
+        foreach (Enemy enemy in enemies)
         {
-            if (go != null)
+            if (enemy != null)
                 enemiesExist = true;
         }
         return enemiesExist;
@@ -143,15 +151,17 @@ public class RoomManager : MonoBehaviour
 
     public void PlayerEnter ()
     {
-        
-        foreach (GameObject go in enemies)
+        foreach (Enemy enemy in enemies)
         {
-            go.SetActive(true);
+            if (enemy != null)//will be null if player re-enters room
+            {
+                enemy.gameObject.SetActive(true);
+            }
         }
     }
 
     public void AddDoor(DoorTransition door)
     {
-        doors.Add(door);
+        door.transform.parent = transform;//just throw this anywhere for now
     }
 }

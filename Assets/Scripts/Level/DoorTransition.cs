@@ -14,19 +14,26 @@ public class DoorTransition : MonoBehaviour
     }
     public CardinalDirections doorLocation;
 
-    private RoomManager roomManager;
+    [HideInInspector]
+    public RoomManager roomManager;
 
     public DoorTransition destination;
     public Transform playerSpawnPosition;
     public GameObject blocker;
 
+    [HideInInspector]
+    public GameObject minimapTile;
 
-    private GameObject player;
+
     
+    void Awake()
+    {
+        roomManager = transform.GetComponentInParent<RoomManager>();
+    }
+
     // Use this for initialization
 	void Start () 
     {
-        player = GameObject.FindGameObjectWithTag("Player");
         roomManager = transform.GetComponentInParent<RoomManager>();
         Debug.DrawLine(transform.position, destination.transform.position, Color.cyan, 1000000f);
 	}

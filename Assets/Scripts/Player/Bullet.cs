@@ -8,10 +8,9 @@ public class Bullet : MonoBehaviour
 
     private bool piercing = false;
 
-    private Vector3 inheritedVelocity;
     private Vector3 direction;
 
-    Rigidbody rigidbody;
+    new Rigidbody rigidbody;
 
     void Start()
     {
@@ -19,10 +18,9 @@ public class Bullet : MonoBehaviour
     }
 
 	// Use this for initialization
-    public void Construct(Vector3 inheritedVelocity, Vector3 direction) 
+    public void Construct(Vector3 direction) 
     {
         this.direction = direction;
-        this.inheritedVelocity = inheritedVelocity;
 	}
 	
 	// Update is called once per frame

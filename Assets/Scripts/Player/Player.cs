@@ -10,7 +10,7 @@ public class Player : MonoBehaviour {
     public float invincibilityDurationAfterDamage;
     private float lastTimeDamageTaken;
 
-    private Renderer renderer;
+    new private Renderer renderer;
     private Color originalColor;
 
 	// Use this for initialization

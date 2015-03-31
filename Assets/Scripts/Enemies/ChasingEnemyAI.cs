@@ -1,20 +1,31 @@
 ﻿using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Pathfinding))]
+
 public class ChasingEnemyAI : Enemy
 {
     Transform target;
+    
+    public ChasingEnemyAI_Stats stats;
+    private float speed;
+
     private Vector3 destination;
-    private Animator animator;
     private Pathfinding pathfindingAgent;
 
     void Start()
     {
+        health = stats.health;
+        speed = stats.speed;
+        damageToPlayerOnCollision = stats.damageToPlayerOnCollision;
+
         // Cache agent component and destination
         pathfindingAgent = GetComponent<Pathfinding>();
         target = GameObject.FindGameObjectWithTag("Player").transform;
-        animator = GetComponent<Animator>();
 
         pathfindingAgent.FindPath(transform.position, target.position);
     }
@@ -42,11 +53,29 @@ public class ChasingEnemyAI : Enemy
     {
         if (pathfindingAgent.Path.Count > 0)
         {
-            transform.position = Vector3.MoveTowards(transform.position, pathfindingAgent.Path[0], Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, pathfindingAgent.Path[0], Time.deltaTime * speed);
             if (Vector3.Distance(transform.position, pathfindingAgent.Path[0]) < 0.1F)
             {
                 pathfindingAgent.Path.RemoveAt(0);
             }
         }
     }
+
+#if UNITY_EDITOR
+    [MenuItem("Assets/Create/Stats/ChasingEnemyAI_Stats")]
+    public static void CreateAsset()
+    {
+        ScriptableObjectUtility.CreateAsset<ChasingEnemyAI_Stats>();
+    }
+#endif
 }
+
+
+//DATA CLASS
+public class ChasingEnemyAI_Stats : Enemy_Stats 
+{
+    public float damageToPlayerOnCollision;
+}
+
+
+

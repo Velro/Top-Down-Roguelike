@@ -3,11 +3,12 @@ using System.Collections;
 
 public class Enemy : MonoBehaviour {
 
+    [HideInInspector]
     public float health;
-
+    [HideInInspector]
     public float damageToPlayerOnCollision;
 
-    private Renderer renderer;
+    new private Renderer renderer;
 
     private void Awake ()
     {
@@ -41,4 +42,10 @@ public class Enemy : MonoBehaviour {
             other.gameObject.SendMessage("Damage", damageToPlayerOnCollision);
         }
     }
+}
+
+public class Enemy_Stats : ScriptableObject
+{
+    public float health;
+    public float speed;
 }

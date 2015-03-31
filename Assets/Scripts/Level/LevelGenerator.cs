@@ -32,7 +32,6 @@ public class LevelGenerator : Singleton<LevelGenerator>
     public int maxNumberOfRooms;
     private int numberOfRooms;
 
-
     [Range(0f, 100f)]
     public float chanceForInferredDoorConnections = 70f;
 
@@ -52,7 +51,6 @@ public class LevelGenerator : Singleton<LevelGenerator>
         {
             roomWeightDictionary.Add(roomTypes[i].room, roomTypes[i].weight);
         }
-
         numberOfRooms = Random.Range(minNumberOfRooms, maxNumberOfRooms);
 
         //instantiate initial room
@@ -60,6 +58,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
         builtRooms.Add(initialRoom);
         MinimapManager.Instance.roomPositions.Add(initialRoom.transform.position);
         MinimapManager.Instance.currentRoom = initialRoom;
+        
         for (int roomIndex = 1; roomIndex < numberOfRooms; roomIndex++)
         {
             RoomManager roomInConstruction = Instantiate(WeightedRandomizer.From(roomWeightDictionary).TakeOne(), Vector3.zero, Quaternion.identity) as RoomManager;
@@ -68,7 +67,9 @@ public class LevelGenerator : Singleton<LevelGenerator>
 
         AddInferredDoors(builtRooms.ToArray());
 
+
         PopulateMinimap(builtRooms.ToArray());
+        MinimapManager.Instance.UpdatePlayerPosition(initialRoom);
 	}
 
     void PlaceRoom(RoomManager roomInConstruction)
@@ -78,7 +79,6 @@ public class LevelGenerator : Singleton<LevelGenerator>
         //figure out where to place next room based on connection point
         Vector3 roomPosition = Vector3.zero;
         
-
         if (randomConnectionPoint.doorLocation == CardinalDirections.east)
         {
             roomPosition = randomConnectionPoint.room.gameObject.transform.position + Vector3.right * spaceBetweenRooms;
@@ -196,8 +196,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
     {
         for (int i = 0; i < rooms.Length; i++)
         {
-            Vector3 transformedRoomInConstructionPos = new Vector3(rooms[i].transform.position.x, rooms[i].transform.position.z, 0);
-            MinimapManager.Instance.roomPositions.Add(transformedRoomInConstructionPos);
+            MinimapManager.Instance.AddRoom(ref rooms[i]);
         }
     }
 
@@ -227,6 +226,9 @@ public class LevelGenerator : Singleton<LevelGenerator>
 
                 DoorTransition doorA = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
                 DoorTransition doorB = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                doorA.roomManager = roomA;
+                doorB.roomManager = roomB;
+
                 doorA.destination = doorB;
                 doorB.destination = doorA;
 
@@ -240,11 +242,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
                 roomA.AddDoor(doorA);
                 roomB.AddDoor(doorB);
 
-                Vector3 roomApos = new Vector3(roomA.transform.position.x, roomA.transform.position.z, 0);
-                Vector3 roomBpos = new Vector3(roomB.transform.position.x, roomB.transform.position.z, 0);
-                MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(roomApos,
-                                                                       roomBpos, 0.5f));
-
+                MinimapManager.Instance.AddDoor(doorA, doorB);
             }
             else if (roomDifference.x == -spaceBetweenRooms &&
                  roomA.possibleDoorLocations.east && roomB.possibleDoorLocations.west &&
@@ -255,6 +253,9 @@ public class LevelGenerator : Singleton<LevelGenerator>
 
                 DoorTransition doorA = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
                 DoorTransition doorB = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                doorA.roomManager = roomA;
+                doorB.roomManager = roomB;
+
                 doorA.destination = doorB;
                 doorB.destination = doorA;
 
@@ -268,10 +269,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
                 roomA.AddDoor(doorA);
                 roomB.AddDoor(doorB);
 
-                Vector3 roomApos = new Vector3(roomA.transform.position.x, roomA.transform.position.z, 0);
-                Vector3 roomBpos = new Vector3(roomB.transform.position.x, roomB.transform.position.z, 0);
-                MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(roomApos,
-                                                                       roomBpos, 0.5f));
+                MinimapManager.Instance.AddDoor(doorA, doorB);
             }
             else if (roomDifference.z == spaceBetweenRooms &&
                      roomA.possibleDoorLocations.south && roomB.possibleDoorLocations.north &&
@@ -282,6 +280,9 @@ public class LevelGenerator : Singleton<LevelGenerator>
 
                 DoorTransition doorA = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
                 DoorTransition doorB = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                doorA.roomManager = roomA;
+                doorB.roomManager = roomB;
+
                 doorA.destination = doorB;
                 doorB.destination = doorA;
 
@@ -295,10 +296,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
                 roomA.AddDoor(doorA);
                 roomB.AddDoor(doorB);
 
-                Vector3 roomApos = new Vector3(roomA.transform.position.x, roomA.transform.position.z, 0);
-                Vector3 roomBpos = new Vector3(roomB.transform.position.x, roomB.transform.position.z, 0);
-                MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(roomApos,
-                                                                       roomBpos, 0.5f));
+                MinimapManager.Instance.AddDoor(doorA, doorB);
             }
             else if (roomDifference.z == -spaceBetweenRooms &&
                      roomA.possibleDoorLocations.north && roomB.possibleDoorLocations.south &&
@@ -309,6 +307,9 @@ public class LevelGenerator : Singleton<LevelGenerator>
 
                 DoorTransition doorA = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
                 DoorTransition doorB = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                doorA.roomManager = roomA;
+                doorB.roomManager = roomB;
+
                 doorA.destination = doorB;
                 doorB.destination = doorA;
 
@@ -322,10 +323,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
                 roomA.AddDoor(doorA);
                 roomB.AddDoor(doorB);
 
-                Vector3 roomApos = new Vector3(roomA.transform.position.x, roomA.transform.position.z, 0);
-                Vector3 roomBpos = new Vector3(roomB.transform.position.x, roomB.transform.position.z, 0);
-                MinimapManager.Instance.doorPositions.Add(Vector3.Lerp(roomApos,
-                                                                       roomBpos, 0.5f));
+                MinimapManager.Instance.AddDoor(doorA, doorB);
             }
         }
     }

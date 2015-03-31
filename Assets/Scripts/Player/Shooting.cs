@@ -7,14 +7,6 @@ public class Shooting : MonoBehaviour
     public float cooldown;
 
     private float lastShootTime;
-
-    Rigidbody rigidbody;
-
-	// Use this for initialization
-	void Start () 
-    {
-        rigidbody = GetComponent<Rigidbody>();
-	}
 	
 	// Update is called once per frame
 	void FixedUpdate () 
@@ -37,8 +29,14 @@ public class Shooting : MonoBehaviour
 
     void SpawnBullet (Vector3 direction)
     {
-        GameObject bulletInstance = Instantiate(bullet, transform.position + Vector3.up, Quaternion.identity) as GameObject;
-        bulletInstance.GetComponent<Bullet>().Construct(rigidbody.velocity, direction);
+        Quaternion bulletSpawnRotation = Quaternion.AngleAxis(Vector3.Angle(Vector3.forward, direction), Vector3.up);
+        //add Vector3.up to move bullet off the ground
+        //add direction/2 to keep the bullet from spawning inside the player
+        Vector3 bulletSpawnPosition = transform.position + Vector3.up + direction/2;
+        GameObject bulletInstance = Instantiate(bullet,
+                                                bulletSpawnPosition,
+                                                bulletSpawnRotation) as GameObject;
+        bulletInstance.GetComponent<Bullet>().Construct(direction);
         lastShootTime = Time.time;
     }
 }
