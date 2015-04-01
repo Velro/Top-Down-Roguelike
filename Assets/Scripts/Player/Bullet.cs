@@ -36,7 +36,7 @@ public class Bullet : MonoBehaviour
             Destroy(gameObject);
         }
 
-        if (other.gameObject.tag == "Enemy")
+        if (other.gameObject.tag == "Enemy" || other.gameObject.tag == "Player")
         {
             other.gameObject.SendMessage("Damage", damage);
             if (!piercing)

@@ -1,18 +1,30 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Enemy : MonoBehaviour {
 
     [HideInInspector]
     public float health;
     [HideInInspector]
+    public float speed;
+    [HideInInspector]
     public float damageToPlayerOnCollision;
 
     new private Renderer renderer;
+    
+    protected Rigidbody rigidbody;
 
     private void Awake ()
     {
         renderer = GetComponentInChildren<Renderer>();
+        rigidbody = GetComponent<Rigidbody>();
+    }
+
+
+    void Update()
+    {
+
     }
 
     public void Damage(float damage)
@@ -48,4 +60,6 @@ public class Enemy_Stats : ScriptableObject
 {
     public float health;
     public float speed;
+    public float rigidbodyMass;
+    public float damageToPlayerOnCollision;
 }

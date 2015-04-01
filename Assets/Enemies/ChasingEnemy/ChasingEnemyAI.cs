@@ -8,38 +8,32 @@ using UnityEditor;
 
 public class ChasingEnemyAI : Enemy
 {
-    Transform target;
+    private Transform target;
     
+    [HideInInspector]
     public ChasingEnemyAI_Stats stats;
-    private float speed;
-
-    private Vector3 destination;
-
-    new Rigidbody rigidbody;
-
+    
     void Start()
     {
         health = stats.health;
         speed = stats.speed;
         damageToPlayerOnCollision = stats.damageToPlayerOnCollision;
 
+        rigidbody.mass = stats.rigidbodyMass;
+
         // Cache agent component and destination
         target = GameObject.FindGameObjectWithTag("Player").transform;
-
-
-        rigidbody = GetComponent<Rigidbody>();
     }
-
+    
     void Update()
     {
         rigidbody.MovePosition(Vector3.MoveTowards(transform.position, target.transform.position, Time.deltaTime * speed));
-
         if (health < 0)
         {
             Die();
         }
     }
-
+    
 
 #if UNITY_EDITOR
     [MenuItem("Assets/Create/Stats/ChasingEnemyAI_Stats")]
@@ -52,9 +46,10 @@ public class ChasingEnemyAI : Enemy
 
 
 //DATA CLASS
+//we'll leave this as a stub and to keep things strict, might fill it out later
 public class ChasingEnemyAI_Stats : Enemy_Stats 
 {
-    public float damageToPlayerOnCollision;
+
 }
 
 
