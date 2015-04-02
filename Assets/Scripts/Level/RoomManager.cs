@@ -4,16 +4,19 @@ using System.Collections.Generic;
 
 public class RoomManager : MonoBehaviour 
 {
+    public RoomType roomType;
+
     [System.Serializable]
-    public struct CardinalDirections
+    public struct NonExclusiveCardinalDirections
     {
         public bool east;
         public bool west;
         public bool north;
         public bool south;
     }
-    public CardinalDirections possibleDoorLocations;
-    [HideInInspector]public CardinalDirections generatedDoorLocations;
+    public NonExclusiveCardinalDirections possibleDoorLocations;
+    [HideInInspector]
+    public NonExclusiveCardinalDirections generatedDoorLocations;
 
     [HideInInspector]
     public Enemy[] enemies;
@@ -26,6 +29,9 @@ public class RoomManager : MonoBehaviour
     [Header("Prefab References")]
     public GameObject northSouthWallPrefab;
     public GameObject eastWestWallPrefab;
+    public GameObject bossRoomDoor;
+    public GameObject treasureRoomDoor;
+    public GameObject normalDoor;
 
     [Header("Transforms for Walls")]
     public Transform eastWall;
@@ -53,27 +59,27 @@ public class RoomManager : MonoBehaviour
         foreach (DoorTransition door in doors)
         {
             door.transform.parent = transform;
-            if (door.doorLocation == DoorTransition.CardinalDirections.east)
+            if (door.doorLocation == CardinalDirections.east)
             {
                 generatedDoorLocations.east = true;
                 door.transform.parent = eastWall;
                 door.transform.eulerAngles = new Vector3(0, 180, 0);
                 door.transform.localPosition = Vector3.zero;
-            }else if (door.doorLocation == DoorTransition.CardinalDirections.west)
+            }else if (door.doorLocation == CardinalDirections.west)
             {
                 generatedDoorLocations.west = true;
                 door.transform.parent = westWall;
                 door.transform.eulerAngles = Vector3.zero;
                 door.transform.localPosition = Vector3.zero;
             }
-            else if (door.doorLocation == DoorTransition.CardinalDirections.north)
+            else if (door.doorLocation == CardinalDirections.north)
             {
                 generatedDoorLocations.north = true;
                 door.transform.parent = northWall;
                 door.transform.eulerAngles = new Vector3(0, 90, 0);
                 door.transform.localPosition = Vector3.zero;
             }
-            else if (door.doorLocation == DoorTransition.CardinalDirections.south)
+            else if (door.doorLocation == CardinalDirections.south)
             {
                 generatedDoorLocations.south = true;
                 door.transform.parent = southWall;
@@ -133,7 +139,7 @@ public class RoomManager : MonoBehaviour
     {
         for (int i = 0; i < doors.Length; i++ )
         {
-            Destroy(doors[i].blocker);
+            Destroy(doors[i].doorModel);
         }
         isLocked = false;
     }

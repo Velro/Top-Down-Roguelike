@@ -3,15 +3,6 @@ using System.Collections;
 
 public class DoorTransition : MonoBehaviour 
 {
-
-    [System.Serializable]
-    public enum CardinalDirections
-    {
-        east,
-        west,
-        north,
-        south
-    }
     public CardinalDirections doorLocation;
 
     [HideInInspector]
@@ -19,12 +10,10 @@ public class DoorTransition : MonoBehaviour
 
     public DoorTransition destination;
     public Transform playerSpawnPosition;
-    public GameObject blocker;
+    public GameObject doorModel;
 
     [HideInInspector]
     public GameObject minimapTile;
-
-
     
     void Awake()
     {

@@ -6,6 +6,7 @@ using UnityEditor;
 #endif
 
 [RequireComponent(typeof(Shooting))]
+[RequireComponent(typeof(Rigidbody))]
 public class WanderingShootingEnemyAI : Enemy 
 {
     [HideInInspector]
@@ -22,6 +23,8 @@ public class WanderingShootingEnemyAI : Enemy
     {
         //stats = Resources.Load("Enemy Stats/WanderingShootingEnemyAI_Stats") as WanderingShootingEnemyAI_Stats;
         shooting = GetComponent<Shooting>();
+        if (!shooting)
+            shooting = gameObject.AddComponent<Shooting>();
 
         health = stats.health;
         speed = stats.speed;

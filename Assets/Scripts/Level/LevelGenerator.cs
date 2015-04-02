@@ -2,17 +2,24 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public enum RoomType
+{
+    normalRoom,
+    treasureRoom,
+    bossRoom
+}
+
+[System.Serializable]
+public enum CardinalDirections
+{
+    east,
+    west,
+    north,
+    south
+}
+
 public class LevelGenerator : Singleton<LevelGenerator> 
 {
-    [System.Serializable]
-    public enum CardinalDirections
-    {
-        east,
-        west,
-        north,
-        south
-    }
-
     [System.Serializable]
     public struct roomPrefabWeightPair
     {
@@ -37,8 +44,14 @@ public class LevelGenerator : Singleton<LevelGenerator>
 
     [Header("Prefab Connections")]
     public roomPrefabWeightPair[] roomTypes;
+    public roomPrefabWeightPair[] treasureRooms;
+    public roomPrefabWeightPair[] bossRooms;
     public DoorTransition eastWestDoorPrefab;
     public DoorTransition northSouthDoorPrefab;
+    public DoorTransition eastWestBossRoomDoor;
+    public DoorTransition northSouthBossRoomDoor;
+    public DoorTransition eastWestTreasureRoomDoor;
+    public DoorTransition northSouthTreasureRoomDoor;
 
     public float spaceBetweenRooms = 20;
 
@@ -46,11 +59,25 @@ public class LevelGenerator : Singleton<LevelGenerator>
 	void Awake () 
     {
         builtRooms = new List<RoomManager>();
+        //normal rooms
         Dictionary<RoomManager, int> roomWeightDictionary = new Dictionary<RoomManager, int>();
         for (int i = 0; i < roomTypes.Length; i++ )
         {
             roomWeightDictionary.Add(roomTypes[i].room, roomTypes[i].weight);
         }
+        //boss rooms
+        Dictionary<RoomManager, int> bossRoomWeightDictionary = new Dictionary<RoomManager, int>();
+        for (int i = 0; i < bossRooms.Length; i++)
+        {
+            bossRoomWeightDictionary.Add(bossRooms[i].room, bossRooms[i].weight);
+        }
+        //treasure rooms
+        Dictionary<RoomManager, int> treasureRoomWeightDictionary = new Dictionary<RoomManager, int>();
+        for (int i = 0; i < treasureRooms.Length; i++)
+        {
+            treasureRoomWeightDictionary.Add(treasureRooms[i].room, treasureRooms[i].weight);
+        }
+
         numberOfRooms = Random.Range(minNumberOfRooms, maxNumberOfRooms);
 
         //instantiate initial room
@@ -58,14 +85,28 @@ public class LevelGenerator : Singleton<LevelGenerator>
         builtRooms.Add(initialRoom);
         MinimapManager.Instance.roomPositions.Add(initialRoom.transform.position);
         MinimapManager.Instance.currentRoom = initialRoom;
-        
-        for (int roomIndex = 1; roomIndex < numberOfRooms; roomIndex++)
+        //regular rooms
+        for (int roomIndex = 1; 
+            roomIndex < numberOfRooms - 2;//subtract 2 is for the boss room and treasure room, which is added on after this loop 
+            roomIndex++)
         {
             RoomManager roomInConstruction = Instantiate(WeightedRandomizer.From(roomWeightDictionary).TakeOne(), Vector3.zero, Quaternion.identity) as RoomManager;
+            roomInConstruction.roomType = RoomType.normalRoom;
             PlaceRoom(roomInConstruction);
         }
-
         AddInferredDoors(builtRooms.ToArray());
+       
+        //special rooms
+        RoomManager bossRoomInConstruction = Instantiate(WeightedRandomizer.From(bossRoomWeightDictionary).TakeOne(), Vector3.zero, Quaternion.identity) as RoomManager;
+        bossRoomInConstruction.roomType = RoomType.bossRoom;
+        PlaceRoom(bossRoomInConstruction);
+        bossRoomInConstruction.possibleDoorLocations.east = false;
+        bossRoomInConstruction.possibleDoorLocations.west = false;
+        bossRoomInConstruction.possibleDoorLocations.north = false;
+        bossRoomInConstruction.possibleDoorLocations.south = false;
+        RoomManager treasureRoomInConstruction = Instantiate(WeightedRandomizer.From(treasureRoomWeightDictionary).TakeOne(), Vector3.zero, Quaternion.identity) as RoomManager;
+        treasureRoomInConstruction.roomType = RoomType.treasureRoom;
+        PlaceRoom(treasureRoomInConstruction);
 
 
         PopulateMinimap(builtRooms.ToArray());
@@ -224,16 +265,31 @@ public class LevelGenerator : Singleton<LevelGenerator>
                 //roomA.generatedDoorLocations.west = true;
                 //roomB.generatedDoorLocations.east = true;
 
-                DoorTransition doorA = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-                DoorTransition doorB = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                DoorTransition doorA;
+                DoorTransition doorB;
+                if (roomA.roomType == RoomType.bossRoom || roomB.roomType == RoomType.bossRoom)
+                {
+                    doorA = Instantiate(eastWestBossRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(eastWestBossRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
+                else if (roomA.roomType == RoomType.treasureRoom || roomB.roomType == RoomType.treasureRoom)
+                {
+                    doorA = Instantiate(eastWestTreasureRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(eastWestTreasureRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
+                else
+                {
+                    doorA = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
                 doorA.roomManager = roomA;
                 doorB.roomManager = roomB;
 
                 doorA.destination = doorB;
                 doorB.destination = doorA;
 
-                doorA.doorLocation = DoorTransition.CardinalDirections.west;
-                doorB.doorLocation = DoorTransition.CardinalDirections.east;
+                doorA.doorLocation = CardinalDirections.west;
+                doorB.doorLocation = CardinalDirections.east;
 
                 //flag this as off for following rooms
                 roomA.possibleDoorLocations.west = false;
@@ -251,16 +307,31 @@ public class LevelGenerator : Singleton<LevelGenerator>
                 //roomA.generatedDoorLocations.east = true;
                 //roomB.generatedDoorLocations.west = true;
 
-                DoorTransition doorA = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-                DoorTransition doorB = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                DoorTransition doorA;
+                DoorTransition doorB;
+                if (roomA.roomType == RoomType.bossRoom || roomB.roomType == RoomType.bossRoom)
+                {
+                    doorA = Instantiate(eastWestBossRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(eastWestBossRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
+                else if (roomA.roomType == RoomType.treasureRoom || roomB.roomType == RoomType.treasureRoom)
+                {
+                    doorA = Instantiate(eastWestTreasureRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(eastWestTreasureRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
+                else
+                {
+                    doorA = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(eastWestDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
                 doorA.roomManager = roomA;
                 doorB.roomManager = roomB;
 
                 doorA.destination = doorB;
                 doorB.destination = doorA;
 
-                doorA.doorLocation = DoorTransition.CardinalDirections.east;
-                doorB.doorLocation = DoorTransition.CardinalDirections.west;
+                doorA.doorLocation = CardinalDirections.east;
+                doorB.doorLocation = CardinalDirections.west;
 
                 //flag this as off for following rooms
                 roomA.possibleDoorLocations.east = false;
@@ -278,16 +349,31 @@ public class LevelGenerator : Singleton<LevelGenerator>
                 //roomA.generatedDoorLocations.south = true;
                 //roomB.generatedDoorLocations.north = true;
 
-                DoorTransition doorA = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-                DoorTransition doorB = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                DoorTransition doorA;
+                DoorTransition doorB;
+                if (roomA.roomType == RoomType.bossRoom || roomB.roomType == RoomType.bossRoom)
+                {
+                    doorA = Instantiate(northSouthBossRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(northSouthBossRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
+                else if (roomA.roomType == RoomType.treasureRoom || roomB.roomType == RoomType.treasureRoom)
+                {
+                    doorA = Instantiate(northSouthTreasureRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(northSouthTreasureRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
+                else
+                {
+                    doorA = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
                 doorA.roomManager = roomA;
                 doorB.roomManager = roomB;
 
                 doorA.destination = doorB;
                 doorB.destination = doorA;
 
-                doorA.doorLocation = DoorTransition.CardinalDirections.south;
-                doorB.doorLocation = DoorTransition.CardinalDirections.north;
+                doorA.doorLocation = CardinalDirections.south;
+                doorB.doorLocation = CardinalDirections.north;
 
                 //flag this as off for following rooms
                 roomA.possibleDoorLocations.south = false;
@@ -305,16 +391,31 @@ public class LevelGenerator : Singleton<LevelGenerator>
                 //roomA.generatedDoorLocations.north = true;
                 //roomB.generatedDoorLocations.south = true;
 
-                DoorTransition doorA = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
-                DoorTransition doorB = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                DoorTransition doorA;
+                DoorTransition doorB;
+                if (roomA.roomType == RoomType.bossRoom || roomB.roomType == RoomType.bossRoom)
+                {
+                    doorA = Instantiate(northSouthBossRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(northSouthBossRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
+                else if (roomA.roomType == RoomType.treasureRoom || roomB.roomType == RoomType.treasureRoom)
+                {
+                    doorA = Instantiate(northSouthTreasureRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(northSouthTreasureRoomDoor, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
+                else
+                {
+                    doorA = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                    doorB = Instantiate(northSouthDoorPrefab, Vector3.zero, Quaternion.identity) as DoorTransition;
+                }
                 doorA.roomManager = roomA;
                 doorB.roomManager = roomB;
 
                 doorA.destination = doorB;
                 doorB.destination = doorA;
 
-                doorA.doorLocation = DoorTransition.CardinalDirections.north;
-                doorB.doorLocation = DoorTransition.CardinalDirections.south;
+                doorA.doorLocation = CardinalDirections.north;
+                doorB.doorLocation = CardinalDirections.south;
 
                 //flag this as off for following rooms
                 roomA.possibleDoorLocations.north = false;
