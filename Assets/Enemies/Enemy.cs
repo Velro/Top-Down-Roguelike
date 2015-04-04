@@ -1,8 +1,15 @@
-﻿using UnityEngine;
+﻿//Not to actually be instantiated
+
+using UnityEngine;
 using System.Collections;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 [RequireComponent(typeof(Rigidbody))]
-public class Enemy : MonoBehaviour {
+public class Enemy : MonoBehaviour 
+{
 
     [HideInInspector]
     public float health;
@@ -21,10 +28,24 @@ public class Enemy : MonoBehaviour {
         rigidbody = GetComponent<Rigidbody>();
     }
 
-
-    void Update()
+    /*private void Start ()
     {
+        PopulateStats(enemyStats);
+    }*/
 
+    protected void PopulateStats(Enemy_Stats stats)
+    {
+        health = stats.health;
+        speed = stats.speed;
+        damageToPlayerOnCollision = stats.damageToPlayerOnCollision;
+    }
+
+    protected void Update()
+    {
+        if (health <= 0)
+        {
+            Die();
+        }
     }
 
     public void Damage(float damage)
@@ -54,6 +75,16 @@ public class Enemy : MonoBehaviour {
             other.gameObject.SendMessage("Damage", damageToPlayerOnCollision);
         }
     }
+
+#if UNITY_EDITOR
+    [MenuItem("Assets/Create/Stats/EnemyAI_Stats")]
+    public static void CreateAsset()
+    {
+        ScriptableObjectUtility.CreateAsset<Enemy_Stats>();
+    }
+#endif
+
+
 }
 
 public class Enemy_Stats : ScriptableObject

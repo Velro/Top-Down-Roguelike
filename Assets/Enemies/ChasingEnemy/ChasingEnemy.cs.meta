@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 45fddb04b40aab34cb73c919333d8646
+timeCreated: 1428135187
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - chasingEnemyStats: {fileID: 11400000, guid: b0028531cc8213c4f8e80d94779f6cb4,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

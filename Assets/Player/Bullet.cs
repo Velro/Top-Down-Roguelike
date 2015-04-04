@@ -12,9 +12,14 @@ public class Bullet : MonoBehaviour
 
     new Rigidbody rigidbody;
 
+    public GameObject particleSystemOnInstantiate;
+    public GameObject particleSystemOnDestroy;
+
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
+        if (particleSystemOnInstantiate != null)
+            Instantiate(particleSystemOnInstantiate, transform.position, Quaternion.identity);
     }
 
 	// Use this for initialization
@@ -31,8 +36,9 @@ public class Bullet : MonoBehaviour
 
     void OnCollisionEnter (Collision other)
     {
-        if (other.gameObject.tag == "Wall")
+        if (other.gameObject.tag == "Wall" || other.gameObject.tag == "Bullet")
         {
+            if (particleSystemOnDestroy != null)Instantiate(particleSystemOnDestroy, transform.position, Quaternion.identity);
             Destroy(gameObject);
         }
 
@@ -41,6 +47,7 @@ public class Bullet : MonoBehaviour
             other.gameObject.SendMessage("Damage", damage);
             if (!piercing)
             {
+                if (particleSystemOnDestroy != null) Instantiate(particleSystemOnDestroy, transform.position, Quaternion.identity);
                 Destroy(gameObject);
             }
         }

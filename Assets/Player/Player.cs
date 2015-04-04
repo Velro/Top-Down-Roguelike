@@ -10,7 +10,7 @@ public class Player : MonoBehaviour
 {
 
     public float health;
-    [HideInInspector]public float maxHealth;
+    public float maxHealth;
 
     public float invincibilityDurationAfterDamage;
     private float lastTimeDamageTaken;
@@ -46,7 +46,7 @@ public class Player : MonoBehaviour
         health = stats.startingHealth;
         
         invincibilityDurationAfterDamage = stats.invincibilityDurationAfterDamage;
-        bullet = stats.bullet;
+        bullet = Instantiate(stats.bullet, new Vector3(1000, 1000, 1000), Quaternion.identity) as Bullet;
 	}
 	
 	// Update is called once per frame
@@ -99,7 +99,7 @@ public class Player : MonoBehaviour
         maxHealth += upgradeStats.maxHealthChange;
         if (upgradeStats.maxHealthChange > 0)//give player free health when their max health increases
         {
-            health += maxHealth;
+            health += upgradeStats.maxHealthChange;
         }
         else if (upgradeStats.maxHealthChange < 0) //dont let health become greater than max health
         {
