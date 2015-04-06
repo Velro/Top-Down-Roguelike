@@ -164,6 +164,26 @@ public class RoomManager : MonoBehaviour
                 enemy.gameObject.SetActive(true);
             }
         }
+        if (roomType == RoomType.bossRoom)
+        {
+            Enemy[] bosses = enemies;
+            UIManager.Instance.EnableBossHealthBar(bosses);
+        }
+        else if (roomType == RoomType.treasureRoom)
+        {
+
+        }
+    }
+
+    public void PlayerExit ()
+    {
+        foreach (Enemy enemy in enemies)
+        {
+            if (enemy != null)//will be null if player re-enters room
+            {
+                Destroy(enemy.gameObject);
+            }
+        }
     }
 
     public void AddDoor(DoorTransition door)

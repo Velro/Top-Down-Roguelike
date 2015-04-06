@@ -22,6 +22,8 @@ public class Enemy : MonoBehaviour
     
     protected Rigidbody rigidbody;
 
+    private bool calledDie;
+
     private void Awake ()
     {
         renderer = GetComponentInChildren<Renderer>();
@@ -46,6 +48,11 @@ public class Enemy : MonoBehaviour
         {
             Die();
         }
+
+        if (health < 0)
+        {
+            health = 0;
+        }
     }
 
     public void Damage(float damage)
@@ -57,7 +64,26 @@ public class Enemy : MonoBehaviour
 
     public void Die()
     {
-        Destroy(gameObject);
+        if (!calledDie)
+        {
+            StartCoroutine(Sink());
+            Collider[] colliders = GetComponents<Collider>();
+            foreach (Collider c in colliders)
+            {
+                c.enabled = false;
+            }
+            calledDie = true;
+        }
+    }
+
+    private IEnumerator Sink()
+    {
+        for (; ; )
+        {
+            transform.position -= Vector3.up * (Time.deltaTime/6);
+            Debug.Log("asdlkfj");
+            yield return 0;
+        }
     }
 
     private IEnumerator Flash()

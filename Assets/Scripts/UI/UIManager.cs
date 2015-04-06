@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class UIManager : Singleton<UIManager> {
-
+public class UIManager : Singleton<UIManager> 
+{
     public GameObject pauseMenu;
     public GameObject gameOverMenu;
+
+    public GameObject bossHealthBarGO;
 
 	// Use this for initialization
 	void Start () {
@@ -45,5 +47,19 @@ public class UIManager : Singleton<UIManager> {
     public void FadedIn()
     {
         GamePlayManager.Instance.FadedIn();
+    }
+
+    //called on room enter
+    public void EnableBossHealthBar(Enemy[] bosses)
+    {
+        bossHealthBarGO.SetActive(true);
+        BossHealthBar bossHealthBar = bossHealthBarGO.GetComponentInChildren<BossHealthBar>();
+        bossHealthBar.bosses = bosses;
+    }
+
+    //called after boss death animation is finished
+    public void DisableBossHealthBar()
+    {
+        bossHealthBarGO.SetActive(false);
     }
 }

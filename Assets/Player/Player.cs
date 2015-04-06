@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
     new private Renderer renderer;
     private Color originalColor;
 
-    private Bullet bullet;
+    [HideInInspector]public Bullet bullet;
     private Shooting shooting;
     private float cooldown;
     private float tShot;
@@ -110,6 +110,7 @@ public class Player : MonoBehaviour
         cooldown += upgradeStats.cooldownChange;
         bullet.GetComponent<Bullet>().damage += upgradeStats.damageChange;
         bullet.transform.localScale += upgradeStats.bulletScale;
+        bullet.piercing = upgradeStats.piercing;
 
         motor.m_AnimSpeedMultiplier += upgradeStats.speedMultiplierChange;
         motor.m_MoveSpeedMultiplier += upgradeStats.speedMultiplierChange;

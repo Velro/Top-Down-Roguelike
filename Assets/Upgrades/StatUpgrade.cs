@@ -5,6 +5,7 @@ using System.Collections;
 using UnityEditor;
 #endif
 
+[RequireComponent(typeof(Collider))]
 public class StatUpgrade : MonoBehaviour 
 {
     public StatUpgrade_Stats upgradeStats;

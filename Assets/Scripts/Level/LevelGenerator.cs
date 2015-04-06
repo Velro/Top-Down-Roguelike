@@ -42,7 +42,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
     [Range(0f, 100f)]
     public float chanceForInferredDoorConnections = 70f;
 
-    [Header("Prefab Connections")]
+    [Header("Room Connections")]
     public roomPrefabWeightPair[] roomTypes;
     public roomPrefabWeightPair[] treasureRooms;
     public roomPrefabWeightPair[] bossRooms;

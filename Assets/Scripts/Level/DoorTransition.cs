@@ -32,7 +32,7 @@ public class DoorTransition : MonoBehaviour
         if (other.gameObject.tag == "Player")
         {
             
-            GamePlayManager.Instance.RoomTransition(destination.roomManager, destination);
+            GamePlayManager.Instance.RoomTransition(roomManager, destination.roomManager, destination);
         }
     }
 }

@@ -12,12 +12,15 @@ public class ChasingEnemy : Enemy
 
     [SerializeField]
     private ChasingEnemy_Stats chasingEnemyStats;
-    
+    private Animator animator;
+
     private void Start()
     {
         // Cache agent component and destination
         target = GameObject.FindGameObjectWithTag("Player").transform;
         PopulateStats(chasingEnemyStats);
+
+        animator = GetComponent<Animator>();
     }
     
     protected void PopulateStats(ChasingEnemy_Stats stats)
@@ -30,8 +33,12 @@ public class ChasingEnemy : Enemy
     {
         base.Update();
         transform.LookAt(target);
-        rigidbody.MovePosition(Vector3.MoveTowards(transform.position, target.transform.position, Time.deltaTime * speed));
 
+        Vector3 moveTowardsAmount = Vector3.MoveTowards(transform.position, target.transform.position, Time.deltaTime * speed);
+
+        rigidbody.MovePosition(moveTowardsAmount);
+
+        animator.SetFloat("Speed", moveTowardsAmount.magnitude);
     }
     
 

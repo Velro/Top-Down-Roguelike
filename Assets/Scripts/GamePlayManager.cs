@@ -9,6 +9,7 @@ public class GamePlayManager : Singleton<GamePlayManager>
     private GameObject mainCamera;
 
     //ugly
+    private RoomManager currentRoom;
     private RoomManager destination;
     private DoorTransition destinationDoor;
 
@@ -37,8 +38,9 @@ public class GamePlayManager : Singleton<GamePlayManager>
         UIManager.Instance.GameOver();
     }
 
-	public void RoomTransition (RoomManager destination, DoorTransition destinationDoor)
+	public void RoomTransition (RoomManager currentRoom, RoomManager destination, DoorTransition destinationDoor)
     {
+        this.currentRoom = currentRoom;
         this.destination = destination;
         this.destinationDoor = destinationDoor;
         UIManager.Instance.GetComponent<Animator>().SetTrigger("FadeOutFadeIn");
@@ -48,13 +50,13 @@ public class GamePlayManager : Singleton<GamePlayManager>
 
     public void FadedOut ()
     {
-        
         player.transform.position = destinationDoor.playerSpawnPosition.position;
         mainCamera.transform.position = destination.cameraTargetPosition.position;
     }
 
     public void FadedIn()
     {
+        currentRoom.PlayerExit();
         player.GetComponent<ThirdPersonUserControl>().enabled = true;
         destination.PlayerEnter();
     }

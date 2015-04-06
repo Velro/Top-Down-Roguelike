@@ -11,4 +11,5 @@ public class StatUpgrade_Stats : ScriptableObject
 
     public float damageChange;
     public Vector3 bulletScale;
+    public bool piercing;
 }

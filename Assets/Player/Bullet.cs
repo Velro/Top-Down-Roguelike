@@ -6,7 +6,7 @@ public class Bullet : MonoBehaviour
     public float speed;
     public float damage;
 
-    private bool piercing = false;
+    public bool piercing = false;
 
     private Vector3 direction;
 
@@ -36,20 +36,19 @@ public class Bullet : MonoBehaviour
 
     void OnCollisionEnter (Collision other)
     {
-        if (other.gameObject.tag == "Wall" || other.gameObject.tag == "Bullet")
-        {
-            if (particleSystemOnDestroy != null)Instantiate(particleSystemOnDestroy, transform.position, Quaternion.identity);
-            Destroy(gameObject);
-        }
-
         if (other.gameObject.tag == "Enemy" || other.gameObject.tag == "Player")
         {
             other.gameObject.SendMessage("Damage", damage);
             if (!piercing)
             {
                 if (particleSystemOnDestroy != null) Instantiate(particleSystemOnDestroy, transform.position, Quaternion.identity);
+                    Destroy(gameObject);
+            }   
+        }
+        else
+        {
+            if (particleSystemOnDestroy != null) Instantiate(particleSystemOnDestroy, transform.position, Quaternion.identity);
                 Destroy(gameObject);
-            }
         }
     }
 }

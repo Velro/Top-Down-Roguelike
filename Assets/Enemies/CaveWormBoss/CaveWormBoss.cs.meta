@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 03549ad547d00d748aacef6c020e3bbf
+timeCreated: 1428179161
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - caveWormBossStats: {fileID: 11400000, guid: 02b1250685169484ab2d511ea0d1e629,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
