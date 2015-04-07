@@ -4,6 +4,7 @@ using UnityStandardAssets.Characters.ThirdPerson;
 
 public class GamePlayManager : Singleton<GamePlayManager> 
 {
+    public float delayToEnemyEnable = 1;
 
     private GameObject player;
     private GameObject mainCamera;
@@ -50,7 +51,7 @@ public class GamePlayManager : Singleton<GamePlayManager>
 
     public void FadedOut ()
     {
-        player.transform.position = destinationDoor.playerSpawnPosition.position;
+        player.GetComponent<Rigidbody>().MovePosition(destinationDoor.playerSpawnPosition.position);
         mainCamera.transform.position = destination.cameraTargetPosition.position;
     }
 

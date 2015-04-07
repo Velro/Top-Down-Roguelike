@@ -12,6 +12,8 @@ public class Player : MonoBehaviour
     public float health;
     public float maxHealth;
 
+    public bool isInvincible;
+
     public float invincibilityDurationAfterDamage;
     private float lastTimeDamageTaken;
 
@@ -52,6 +54,7 @@ public class Player : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
+        Debug.Log(Random.seed);
 	    if (health <= 0)
         {
             GamePlayManager.Instance.PlayerDied();
@@ -87,7 +90,8 @@ public class Player : MonoBehaviour
 
     public void Damage(float damage)
     {
-        if (Time.time > lastTimeDamageTaken + invincibilityDurationAfterDamage || lastTimeDamageTaken == 0)
+        if ((Time.time > lastTimeDamageTaken + invincibilityDurationAfterDamage || lastTimeDamageTaken == 0)
+            && !isInvincible)
         {
             health -= damage;
             lastTimeDamageTaken = Time.time;

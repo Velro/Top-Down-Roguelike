@@ -9,7 +9,7 @@ public class MinimapManager : Singleton<MinimapManager>
 
     public RoomManager[] rooms;
 
-    public float spaceBetweenRooms;
+    public float minimapSpaceBetweenRooms;
 
     public Transform minimapContent;
 
@@ -22,7 +22,7 @@ public class MinimapManager : Singleton<MinimapManager>
 	public void UpdatePlayerPosition(RoomManager destinationRoom)
     {
         Vector3 transformedDestinationRoomPos = new Vector3(-destinationRoom.transform.position.x, -destinationRoom.transform.position.z, 0);
-        minimapContent.transform.localPosition = (transformedDestinationRoomPos / LevelGenerator.Instance.spaceBetweenRooms) * 60;
+        minimapContent.transform.localPosition = (transformedDestinationRoomPos / LevelGenerator.Instance.spaceBetweenRooms) * minimapSpaceBetweenRooms;
 
         destinationRoom.minimapTile.SetActive(true);
         DoorTransition[] destinationRoomDoors = destinationRoom.GetComponentsInChildren<DoorTransition>();
@@ -51,7 +51,7 @@ public class MinimapManager : Singleton<MinimapManager>
         uiObjInstance.transform.SetParent(minimapContent);
         uiObjInstance.transform.localScale = Vector3.one;
 
-        uiObjInstance.transform.localPosition = (pos / LevelGenerator.Instance.spaceBetweenRooms) * 60;
+        uiObjInstance.transform.localPosition = (pos / LevelGenerator.Instance.spaceBetweenRooms) * minimapSpaceBetweenRooms;
         uiObjInstance.SetActive(false);
 
         return uiObjInstance;

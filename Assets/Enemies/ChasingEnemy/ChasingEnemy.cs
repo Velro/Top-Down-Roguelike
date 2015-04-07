@@ -38,7 +38,7 @@ public class ChasingEnemy : Enemy
 
         rigidbody.MovePosition(moveTowardsAmount);
 
-        animator.SetFloat("Speed", moveTowardsAmount.magnitude);
+        animator.SetFloat("Forward", moveTowardsAmount.magnitude);
     }
     
 

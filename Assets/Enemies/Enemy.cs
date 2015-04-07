@@ -66,7 +66,7 @@ public class Enemy : MonoBehaviour
     {
         if (!calledDie)
         {
-            StartCoroutine(Sink());
+            Invoke("StartSinking", 1);
             Collider[] colliders = GetComponents<Collider>();
             foreach (Collider c in colliders)
             {
@@ -76,12 +76,31 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public void Pierced ()
+    {
+        gameObject.layer = LayerMask.NameToLayer("EnemyNoBulletCollision");
+        Invoke("BackToEnemyLayer", 0.25f);
+    }
+
+    private void BackToEnemyLayer()
+    {
+        gameObject.layer = LayerMask.NameToLayer("EnemyLayer");
+    }
+
+    private void StartSinking()
+    {
+        StartCoroutine(Sink());
+    }
+
     private IEnumerator Sink()
     {
         for (; ; )
         {
             transform.position -= Vector3.up * (Time.deltaTime/6);
-            Debug.Log("asdlkfj");
+            if (transform.position.y < -3)
+            {
+                Destroy(gameObject);
+            }
             yield return 0;
         }
     }

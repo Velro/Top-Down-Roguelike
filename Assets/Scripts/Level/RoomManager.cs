@@ -51,7 +51,12 @@ public class RoomManager : MonoBehaviour
         enemies = transform.GetComponentsInChildren<Enemy>();
         foreach (Enemy enemy in enemies)
         {
-            enemy.gameObject.SetActive(false);
+            enemy.enabled = false;
+        }
+        TreasureRoomGetUpgrade[] treasureRoomUpgrades = GetComponentsInChildren<TreasureRoomGetUpgrade>();
+        foreach (TreasureRoomGetUpgrade treasureSpawner in treasureRoomUpgrades)
+        {
+            treasureSpawner.enabled = false;
         }
         
         doors = transform.GetComponentsInChildren<DoorTransition>();
@@ -157,21 +162,11 @@ public class RoomManager : MonoBehaviour
 
     public void PlayerEnter ()
     {
-        foreach (Enemy enemy in enemies)
+        Invoke("EnableEnemies", GamePlayManager.Instance.delayToEnemyEnable);
+        TreasureRoomGetUpgrade[] treasureRoomUpgrades = GetComponentsInChildren<TreasureRoomGetUpgrade>();
+        foreach (TreasureRoomGetUpgrade treasureSpawner in treasureRoomUpgrades)
         {
-            if (enemy != null)//will be null if player re-enters room
-            {
-                enemy.gameObject.SetActive(true);
-            }
-        }
-        if (roomType == RoomType.bossRoom)
-        {
-            Enemy[] bosses = enemies;
-            UIManager.Instance.EnableBossHealthBar(bosses);
-        }
-        else if (roomType == RoomType.treasureRoom)
-        {
-
+            treasureSpawner.enabled = true;
         }
     }
 
@@ -189,5 +184,22 @@ public class RoomManager : MonoBehaviour
     public void AddDoor(DoorTransition door)
     {
         door.transform.parent = transform;//just throw this anywhere for now
+    }
+
+    private void EnableEnemies()
+    {
+        foreach (Enemy enemy in enemies)
+        {
+            if (enemy != null)//will be null if player re-enters room
+            {
+                enemy.enabled = true;
+            }
+        }
+
+        if (roomType == RoomType.bossRoom)
+        {
+            Enemy[] bosses = enemies;
+            UIManager.Instance.EnableBossHealthBar(bosses);
+        }
     }
 }

@@ -35,6 +35,11 @@ public class LevelGenerator : Singleton<LevelGenerator>
 
     List<RoomManager> builtRooms;
 
+    [Header("Custom Seed")]
+    public int customSeed;
+
+    [Header("Gen Settings")]
+
     public int minNumberOfRooms;
     public int maxNumberOfRooms;
     private int numberOfRooms;
@@ -58,6 +63,9 @@ public class LevelGenerator : Singleton<LevelGenerator>
 	// Use this for initialization
 	void Awake () 
     {
+        if (customSeed != 0)
+            Random.seed = customSeed;
+
         builtRooms = new List<RoomManager>();
         //normal rooms
         Dictionary<RoomManager, int> roomWeightDictionary = new Dictionary<RoomManager, int>();

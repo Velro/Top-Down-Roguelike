@@ -43,7 +43,11 @@ public class Bullet : MonoBehaviour
             {
                 if (particleSystemOnDestroy != null) Instantiate(particleSystemOnDestroy, transform.position, Quaternion.identity);
                     Destroy(gameObject);
-            }   
+            }
+            else
+            {
+                other.gameObject.SendMessage("Pierced");
+            }
         }
         else
         {

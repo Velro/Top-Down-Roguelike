@@ -17,11 +17,14 @@ public class WanderingShootingEnemy : Enemy
     private Vector2 origin1;
     private Vector2 origin2;
 
+    private Animator animator;
+
 	// Use this for initialization
 	void Start () 
     {
         //stats = Resources.Load("Enemy Stats/WanderingShootingEnemyAI_Stats") as WanderingShootingEnemyAI_Stats;
         shooting = GetComponent<Shooting>();
+        animator = GetComponent<Animator>();
         if (!shooting)
             shooting = gameObject.AddComponent<Shooting>();
 
@@ -54,6 +57,7 @@ public class WanderingShootingEnemy : Enemy
 
         transform.LookAt(rigidbody.position + perlinNoise);
         rigidbody.MovePosition(rigidbody.position + perlinNoise);//move to XZ space
+        Debug.Log(perlinNoise.magnitude);
 
         //shooting
         if (Time.time > lastShotTime + timeToNextShot)

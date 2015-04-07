@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class UpgradeManager : MonoBehaviour 
+public class UpgradeManager : Singleton<UpgradeManager>
 {
+    [System.Serializable]
     struct UpgradeWeightPair
     {
         public GameObject upgrade;
@@ -29,23 +30,19 @@ public class UpgradeManager : MonoBehaviour
             bossDropsDictionary.Add(bossDrops[i].upgrade, bossDrops[i].weight);
         }
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 
-    GameObject PickRoomUpgrade ()
+
+    public GameObject PickRoomUpgrade ()
     {
         return PickUpgrade(roomDropsDictionary);
     }
 
-    GameObject PickBossUpgrade()
+    public GameObject PickBossUpgrade()
     {
         return PickUpgrade(bossDropsDictionary);
     }
 
-    GameObject PickUpgrade (Dictionary<GameObject, int> dict)
+    private GameObject PickUpgrade (Dictionary<GameObject, int> dict)
     {
         GameObject upgrade = WeightedRandomizer.From(dict).TakeOne();
         
