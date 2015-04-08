@@ -135,6 +135,14 @@ public class RoomManager : MonoBehaviour
         if (!CheckIfEnemies())
         {
             UnlockDoors();
+            if (roomType == RoomType.bossRoom)
+            {
+                BossRoomGetUpgrade[] bossRoomUpgrades = GetComponentsInChildren<BossRoomGetUpgrade>();
+                foreach (BossRoomGetUpgrade bossUpgradeSpawner in bossRoomUpgrades)
+                {
+                    bossUpgradeSpawner.enabled = true;
+                }
+            }
         }
 	}
 
@@ -163,10 +171,14 @@ public class RoomManager : MonoBehaviour
     public void PlayerEnter ()
     {
         Invoke("EnableEnemies", GamePlayManager.Instance.delayToEnemyEnable);
-        TreasureRoomGetUpgrade[] treasureRoomUpgrades = GetComponentsInChildren<TreasureRoomGetUpgrade>();
-        foreach (TreasureRoomGetUpgrade treasureSpawner in treasureRoomUpgrades)
+
+        if (roomType == RoomType.treasureRoom)
         {
-            treasureSpawner.enabled = true;
+            TreasureRoomGetUpgrade[] treasureRoomUpgrades = GetComponentsInChildren<TreasureRoomGetUpgrade>();
+            foreach (TreasureRoomGetUpgrade treasureSpawner in treasureRoomUpgrades)
+            {
+                treasureSpawner.enabled = true;
+            }
         }
     }
 

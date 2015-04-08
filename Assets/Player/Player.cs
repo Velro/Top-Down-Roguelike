@@ -29,7 +29,9 @@ public class Player : MonoBehaviour
 
     private ThirdPersonCharacter motor;
     private float speedMultiplier;
-    
+
+    private Vector3 aimDirection;
+
 	// Use this for initialization
 	void Start () 
     {
@@ -53,8 +55,7 @@ public class Player : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () 
-    {
-        Debug.Log(Random.seed);
+    {   
 	    if (health <= 0)
         {
             GamePlayManager.Instance.PlayerDied();
@@ -69,7 +70,7 @@ public class Player : MonoBehaviour
             renderer.material.SetColor("_Color", Color.black);
         }
 
-        Vector3 aimDirection = new Vector3(Input.GetAxisRaw("Aim Horizontal"), 0, Input.GetAxisRaw("Aim Vertical"));
+        aimDirection = new Vector3(Input.GetAxisRaw("Aim Horizontal"), 0, Input.GetAxisRaw("Aim Vertical"));
         if (Time.time > tShot + cooldown)
         {
             if (Mathf.Abs(aimDirection.x) > 0.8f)
@@ -118,6 +119,11 @@ public class Player : MonoBehaviour
 
         motor.m_AnimSpeedMultiplier += upgradeStats.speedMultiplierChange;
         motor.m_MoveSpeedMultiplier += upgradeStats.speedMultiplierChange;
+    }
+
+    public Vector3 GetAimDirection ()
+    {
+        return aimDirection;
     }
 
 #if UNITY_EDITOR

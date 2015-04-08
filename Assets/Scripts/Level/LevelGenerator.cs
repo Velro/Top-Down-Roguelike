@@ -48,6 +48,7 @@ public class LevelGenerator : Singleton<LevelGenerator>
     public float chanceForInferredDoorConnections = 70f;
 
     [Header("Room Connections")]
+    public RoomManager startingRoom;
     public roomPrefabWeightPair[] roomTypes;
     public roomPrefabWeightPair[] treasureRooms;
     public roomPrefabWeightPair[] bossRooms;
@@ -89,10 +90,11 @@ public class LevelGenerator : Singleton<LevelGenerator>
         numberOfRooms = Random.Range(minNumberOfRooms, maxNumberOfRooms);
 
         //instantiate initial room
-        RoomManager initialRoom = Instantiate(roomTypes[0].room, Vector3.zero, Quaternion.identity) as RoomManager;
+        RoomManager initialRoom = Instantiate(startingRoom, Vector3.zero, Quaternion.identity) as RoomManager;
         builtRooms.Add(initialRoom);
         MinimapManager.Instance.roomPositions.Add(initialRoom.transform.position);
         MinimapManager.Instance.currentRoom = initialRoom;
+        
         //regular rooms
         for (int roomIndex = 1; 
             roomIndex < numberOfRooms - 2;//subtract 2 is for the boss room and treasure room, which is added on after this loop 
